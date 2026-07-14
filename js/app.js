@@ -16,7 +16,6 @@
   var timeOffset = 0; // serverNow - clientNow
   var timerInterval = null;
   var myName = "";
-  var lastSoundSeq = 0;
 
   var $ = function (id) {
     return document.getElementById(id);
@@ -141,14 +140,6 @@
     renderApp();
   }
 
-  function handleSounds(view) {
-    if (!view || !view.soundCue || !window.Sounds) return;
-    if (view.soundCue.seq <= lastSoundSeq) return;
-    lastSoundSeq = view.soundCue.seq;
-    if (view.soundCue.type === "correct") Sounds.playCorrect();
-    else if (view.soundCue.type === "wrong") Sounds.playWrong();
-  }
-
   /* --------------------------- action sending ------------------------- */
 
   function sendAction(action) {
@@ -161,7 +152,6 @@
 
   function renderApp() {
     if (!currentView) return;
-    handleSounds(currentView);
     var ctx = { myId: net.myId, isHost: net.isHost };
     $("app").innerHTML = UI.render(currentView, ctx);
     var foot = $("footer");

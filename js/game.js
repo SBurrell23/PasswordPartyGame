@@ -60,7 +60,6 @@
       deadline: null, // epoch ms for the active timer
       lastResult: null, // { scoringTeam, points, word }
       message: null,
-      soundCue: null, // { type: 'correct'|'wrong', seq: number }
     };
   };
 
@@ -88,12 +87,6 @@
       self.timer = null;
       fn.call(self);
     }, ms);
-  };
-
-  P.bumpSound = function (type) {
-    var s = this.state;
-    var seq = (s.soundCue && s.soundCue.seq) || 0;
-    s.soundCue = { type: type, seq: seq + 1 };
   };
 
   P.playerAt = function (team, role) {
@@ -421,13 +414,11 @@
       // OR a timed-out turn). Full points only if they nail it on the first try.
       var points = Math.max(0, s.config.fullPoints - s.turnsUsed[team]);
       s.scores[team] += points;
-      this.bumpSound("correct");
       this.endRound(team, points);
     } else {
       // 'wrong'
       s.wrongs[team] += 1;
       s.turnsUsed[team] += 1;
-      this.bumpSound("wrong");
       this.advanceTurn();
     }
   };
@@ -436,7 +427,6 @@
     var s = this.state;
     // Timeout counts as a used turn but is NOT a wrong answer.
     s.turnsUsed[s.currentTeam] += 1;
-    this.bumpSound("wrong");
     this.advanceTurn();
   };
 
