@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password — P2P Party Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="app-head">
+        <h1 class="logo">PASS<span>WORD</span></h1>
+        <p class="tag">A peer-to-peer party game for 4 players</p>
+      </header>
+
+      <div id="status" class="status"></div>
+
+      <!-- Home / entry screen -->
+      <section id="home" class="home">
+        <div class="home-grid">
+          <div class="card home-card">
+            <h2>Create a Lobby</h2>
+            <p class="muted">You'll be the host. Share the room code with 3 friends.</p>
+            <label>Your name<input id="hostName" type="text" maxlength="20" placeholder="Host" /></label>
+            <button id="createBtn" class="primary big">Create Lobby</button>
+          </div>
+          <div class="card home-card">
+            <h2>Join a Lobby</h2>
+            <p class="muted">Enter the room code your host shared.</p>
+            <label>Your name<input id="joinName" type="text" maxlength="20" placeholder="Player" /></label>
+            <label>Room code<input id="joinCode" type="text" maxlength="8" placeholder="ABCD" class="code-input" /></label>
+            <button id="joinBtn" class="primary big">Join Lobby</button>
+          </div>
+        </div>
+        <details class="card how">
+          <summary>How to play</summary>
+          <ol>
+            <li>4 players split into <b>Red</b> and <b>Blue</b> teams — each with a clue giver and a guesser.</li>
+            <li>The word is shown to both givers. One giver (starting with the team that last scored) chooses <b>Play</b> or <b>Pass</b>. Either giver may vote <b>Skip</b> — if both skip, you get a new word.</li>
+            <li>On each turn a giver gives a <b>one-word verbal clue</b> and the guesser answers <b>out loud</b>. The giver taps <b>Correct</b> or <b>Wrong</b> before the timer runs out.</li>
+            <li>Scoring: <b>full points</b> (host-set, default 7) if right on the first try, minus 1 for every wrong guess <em>or timed-out turn</em> your team had. Each team gets a set number of turns per round (default 4).</li>
+            <li>Play through all the rounds (default 14), swapping clue giver and guesser at halftime. Most points wins!</li>
+          </ol>
+          <p class="muted small">All guessing happens by voice — the app just tracks the game.</p>
+        </details>
+      </section>
+
+      <!-- In-game container (rendered by ui.js) -->
+      <section id="app" class="app hidden"></section>
+
+      <footer class="app-foot" id="footer">
+        <span>Word list by the EFF (CC BY 3.0 US). P2P via PeerJS.</span>
+      </footer>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="js/words.js"></script>
+    <script src="js/net.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
