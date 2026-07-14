@@ -232,7 +232,7 @@
         ? '<div class="waiting">Locked in ✓ — starting the round…</div>'
         : '<div class="choices">' +
           '<button class="choice play" data-act="decision" data-choice="play">PLAY<small>My team gives clues</small></button>' +
-          '<button class="choice pass" data-act="decision" data-choice="pass">PASS<small>Other team gives clues</small></button>' +
+          '<button class="choice pass" data-act="decision" data-choice="pass">PASS<small>Other team starts.</small></button>' +
           '<button class="choice skip" data-act="decision" data-choice="skip">SKIP<small>New word (both must skip)</small></button>' +
           "</div>";
       body =
