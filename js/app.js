@@ -16,6 +16,7 @@
   var timeOffset = 0; // serverNow - clientNow
   var timerInterval = null;
   var myName = "";
+  var sound = null;
 
   var $ = function (id) {
     return document.getElementById(id);
@@ -70,6 +71,7 @@
       .host(code)
       .then(function (id) {
         engine.setHost(id, name);
+        if (sound) sound.playLocal("skip");
         setStatus("");
         showApp();
       })
@@ -121,6 +123,7 @@
       .join(code)
       .then(function () {
         net.sendToHost({ type: "hello", name: name });
+        if (sound) sound.playLocal("skip");
         setStatus("");
         showApp();
       })
@@ -156,6 +159,7 @@
     $("app").innerHTML = UI.render(currentView, ctx);
     var foot = $("footer");
     if (foot) foot.style.display = currentView.phase === "lobby" ? "" : "none";
+    if (sound) sound.consumeCue(currentView.soundCue);
     startTimerTick();
   }
 
@@ -169,7 +173,10 @@
     var fill = $("timerFill");
     var text = $("timerText");
     var box = document.querySelector(".timer");
-    if (!currentView || !currentView.deadline || !fill || !box) return;
+    if (!currentView || !currentView.deadline || !fill || !box) {
+      if (sound) sound.stopTicking();
+      return;
+    }
     var total = parseInt(box.getAttribute("data-total"), 10) || 1;
     var remaining = currentView.deadline - (Date.now() + timeOffset);
     if (remaining < 0) remaining = 0;
@@ -178,6 +185,76 @@
     if (text) text.textContent = Math.ceil(remaining / 1000) + "s";
     if (pct < 0.34) fill.classList.add("low");
     else fill.classList.remove("low");
+
+    // Tick only during active turns and only for the final 4 seconds.
+    if (sound) {
+      if (currentView.phase === "turn" && remaining > 0 && remaining <= 4000)
+        sound.startTicking();
+      else sound.stopTicking();
+    }
+  }
+
+  function bindAudioControls() {
+    var soundUi = $("soundUi");
+    var toggle = $("soundToggle");
+    var menu = $("soundMenu");
+    var music = $("musicVolume");
+    var fx = $("fxVolume");
+    var musicVal = $("musicVolumeValue");
+    var fxVal = $("fxVolumeValue");
+    if (!sound || !soundUi || !toggle || !menu || !music || !fx || !musicVal || !fxVal)
+      return;
+
+    function openMenu() {
+      menu.classList.remove("hidden");
+      toggle.setAttribute("aria-expanded", "true");
+    }
+
+    function closeMenu() {
+      menu.classList.add("hidden");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+
+    toggle.addEventListener("click", function () {
+      if (menu.classList.contains("hidden")) openMenu();
+      else closeMenu();
+    });
+
+    document.addEventListener("click", function (e) {
+      if (menu.classList.contains("hidden")) return;
+      if (!soundUi.contains(e.target)) closeMenu();
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeMenu();
+    });
+
+    function asPercent(unitValue) {
+      return Math.round(unitValue * 100);
+    }
+
+    function setText(el, percent) {
+      el.textContent = percent + "%";
+    }
+
+    var musicPct = asPercent(sound.settings.music);
+    var fxPct = asPercent(sound.settings.fx);
+    music.value = String(musicPct);
+    fx.value = String(fxPct);
+    setText(musicVal, musicPct);
+    setText(fxVal, fxPct);
+
+    music.addEventListener("input", function () {
+      var pct = parseInt(music.value, 10) || 0;
+      sound.setMusicVolume(pct / 100);
+      setText(musicVal, pct);
+    });
+
+    fx.addEventListener("input", function () {
+      var pct = parseInt(fx.value, 10) || 0;
+      sound.setFxVolume(pct / 100);
+      setText(fxVal, pct);
+    });
   }
 
   /* --------------------------- event wiring --------------------------- */
@@ -279,6 +356,9 @@
   /* ------------------------------- boot ------------------------------- */
 
   function boot() {
+    sound = new SoundManager();
+    bindAudioControls();
+
     var params = new URLSearchParams(location.search);
     var presetRoom = params.get("room");
     if (presetRoom) $("joinCode").value = presetRoom.toUpperCase();

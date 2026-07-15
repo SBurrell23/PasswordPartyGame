@@ -21,6 +21,45 @@
 
       <div id="status" class="status"></div>
 
+      <div class="sound-ui" id="soundUi">
+        <button
+          id="soundToggle"
+          class="sound-fab"
+          type="button"
+          aria-label="Open sound settings"
+          aria-expanded="false"
+        >
+          <span class="sound-icon" aria-hidden="true">&#9835;</span>
+        </button>
+        <section class="sound-menu card hidden" id="soundMenu" aria-label="Sound settings">
+          <h3>Audio</h3>
+          <label class="audio-row"
+            >Music volume
+            <input
+              id="musicVolume"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value="30"
+            />
+            <span id="musicVolumeValue">30%</span>
+          </label>
+          <label class="audio-row"
+            >FX volume
+            <input
+              id="fxVolume"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value="50"
+            />
+            <span id="fxVolumeValue">50%</span>
+          </label>
+        </section>
+      </div>
+
       <!-- Home / entry screen -->
       <section id="home" class="home">
         <div class="home-grid">
@@ -64,6 +103,7 @@
     <script src="js/net.js"></script>
     <script src="js/game.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/audio.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>

@@ -36,12 +36,37 @@
     return p ? p.name : null;
   }
 
+  function rosterItem(view, team, role, label) {
+    var p = playerAt(view, team, role);
+    var txt = p ? esc(p.name) : "—";
+    if (p && p.connected === false) txt += " (offline)";
+    return (
+      '<div class="roster-item"><span class="roster-role">' +
+      label +
+      ':</span><span class="roster-name">' +
+      txt +
+      "</span></div>"
+    );
+  }
+
+  function teamRoster(view, team) {
+    return (
+      '<div class="team-roster ' +
+      team +
+      '">' +
+      rosterItem(view, team, "giver", "Clue Giver") +
+      rosterItem(view, team, "guesser", "Guesser") +
+      "</div>"
+    );
+  }
+
   /* ------------------------------- header ------------------------------ */
 
   function header(view) {
     if (view.phase === "lobby") return "";
     return (
       '<div class="scoreboard">' +
+      '<div class="scoreboard-main">' +
       '<div class="score red"><span class="dot"></span>Red<b>' +
       view.scores.red +
       "</b></div>" +
@@ -55,6 +80,11 @@
       '<div class="score blue"><span class="dot"></span>Blue<b>' +
       view.scores.blue +
       "</b></div>" +
+      "</div>" +
+      '<div class="team-rosters">' +
+      teamRoster(view, "red") +
+      teamRoster(view, "blue") +
+      "</div>" +
       "</div>"
     );
   }
@@ -341,7 +371,7 @@
         "</div></div>" +
         '<p class="turn-note">' +
         teamLabel(team) +
-        "'s clue giver is up. Wait your turn.</p>";
+        " team is up! Wait your turn..</p>";
     } else {
       // A guesser.
       main =
@@ -361,8 +391,6 @@
       '<h2 class="whose-turn ' +
       team +
       '">' +
-      teamLabel(team) +
-      "'s turn — " +
       esc(giver ? giver.name : "") +
       " → " +
       esc(guesser ? guesser.name : "") +

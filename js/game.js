@@ -60,6 +60,8 @@
       deadline: null, // epoch ms for the active timer
       lastResult: null, // { scoringTeam, points, word }
       message: null,
+      soundCueSeq: 0,
+      soundCue: null,
     };
   };
 
@@ -71,6 +73,15 @@
 
   P.change = function () {
     this.onChange(this.state);
+  };
+
+  P.emitSound = function (name) {
+    this.state.soundCueSeq += 1;
+    this.state.soundCue = {
+      id: this.state.soundCueSeq,
+      name: name,
+      ts: Date.now(),
+    };
   };
 
   P.clearTimer = function () {
@@ -342,10 +353,13 @@
       // Starting giver: full choice.
       if (["play", "pass", "skip"].indexOf(choice) < 0) return;
       s.decisions[first] = choice;
+      if (choice === "play" || choice === "pass") this.emitSound("play-pass");
+      else this.emitSound("skip");
     } else {
       // Other giver: may only vote to SKIP.
       if (choice !== "skip") return;
       s.decisions[other] = "skip";
+      this.emitSound("skip");
     }
 
     // A definite PLAY/PASS from the starter resolves immediately.
@@ -357,9 +371,9 @@
     // Once both givers have voted SKIP, cap the remaining countdown at 7s so a
     // doomed word doesn't linger — but still give a moment before the reroll.
     if (s.decisions[first] === "skip" && s.decisions[other] === "skip") {
-      if (s.deadline - Date.now() > 7000) {
-        s.deadline = Date.now() + 7000;
-        this.schedule(this.resolveDecision, 7000);
+      if (s.deadline - Date.now() > 5000) {
+        s.deadline = Date.now() + 5000;
+        this.schedule(this.resolveDecision, 5000);
       }
     }
     // Otherwise (including a mutual SKIP) let the decision timer run out before
@@ -410,12 +424,14 @@
     this.clearTimer();
     var team = s.currentTeam;
     if (result === "correct") {
+      this.emitSound("correct");
       // Score drops by one for every prior turn this team spent (a wrong guess
       // OR a timed-out turn). Full points only if they nail it on the first try.
       var points = Math.max(0, s.config.fullPoints - s.turnsUsed[team]);
       s.scores[team] += points;
       this.endRound(team, points);
     } else {
+      this.emitSound("wrong-timeout");
       // 'wrong'
       s.wrongs[team] += 1;
       s.turnsUsed[team] += 1;
@@ -425,6 +441,7 @@
 
   P.timeoutTurn = function () {
     var s = this.state;
+    this.emitSound("wrong-timeout");
     // Timeout counts as a used turn but is NOT a wrong answer.
     s.turnsUsed[s.currentTeam] += 1;
     this.advanceTurn();
@@ -482,6 +499,7 @@
     var p = s.players[id];
     if (!p || p.role !== "giver") return;
     s.ready[p.team] = true;
+    if (s.phase === "roundEnd") this.emitSound("next-turn");
     if (s.ready.red && s.ready.blue) {
       if (s.phase === "roundEnd") this.advanceFromRoundEnd();
       else this.beginRound(s.round + 1);
